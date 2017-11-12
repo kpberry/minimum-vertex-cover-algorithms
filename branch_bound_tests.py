@@ -5,9 +5,9 @@ Created on Sat Nov 11 08:57:01 2017
 @author: Mostafa Reisi
 """
 import networkx as nx
-import pip
+#import pip
 
-pip.main(['install', 'pulp'])
+#pip.main(['install', 'pulp'])
 import pulp as lp
 
 from numpy import inf
@@ -35,7 +35,7 @@ class BranchBound(object):
             # the right child - not include selected vertex in the set
             # self.remaining_vertices[:-1] makes a copy of the first n - 1
             #   remaining vertices instead of passing around the original list
-            
+            self.remaining_vertices.sort(key=lambda x: self.graph.degree(x))
             right_child = BranchBound(self.graph.copy(),
                                       self.remaining_vertices[:-1],
                                       self.vc_size)
@@ -72,7 +72,7 @@ class BranchBound(object):
             # solve the problem
             result = prob.solve()
         else:
-            result = self.vc_size -1
+            result = self.vc_size - 1 # when node is zero we set the lower bound one smaller than the solution
         return result
 
 
@@ -88,34 +88,29 @@ def read_graph(filename):
     return graph
 
 
-def run(filename):
-    # generate a graph
-    graph = nx.Graph()
-    # convert the input graph into an nx graph
-    input_graph = read_graph(filename)
-    graph.add_nodes_from([i for i in input_graph])
-    for j in input_graph:
-        graph.add_edges_from([(j, i) for i in input_graph[j]])
 
-    root = BranchBound(graph, graph.nodes(), 0)
-    frontier = []
-    frontier.extend([root])
-    cur_solution_size = inf
-    while len(frontier) > 0:
-        frontier.sort(key=lambda x: x.lb, reverse=True)
-        current = frontier.pop()
-        cur_children = current.expand()
-        if not cur_children:
-            if not current.graph.nodes():
-                if cur_solution_size > current.vc_size:
-                    cur_solution_size = current.vc_size
-        else:
-            frontier.extend(cur_children)
+graph = nx.Graph()
+nodes =  list(range(0, 7))
+graph.add_nodes_from(nodes)
+graph.add_edges_from([(0,1),(1,2), (2, 3), (2, 4), (3, 4), (3, 5), (3, 6) , (4, 5)])
+#graph.add_edges_from([(0,1),(1,2), (2, 3), (3, 4), (3, 5), (3, 6), (4, 5) , (4, 6), (5, 6)])
+#graph.add_edges_from([(0,1),(0,2), (0, 3), (0, 4), (0, 5), (0, 6)])
+root = BranchBound(graph, graph.nodes(), 0)
+frontier = []
+frontier.extend([root])
+cur_solution_size = inf
+while len(frontier) > 0:
+    frontier.sort(key=lambda x: x.lb, reverse=True)
+    current = frontier.pop()
+    cur_children = current.expand()
+    if not cur_children:
+        if not current.graph.nodes():
+            if cur_solution_size > current.vc_size:
+                cur_solution_size = current.vc_size
+    else:
+        frontier.extend(cur_children)
 
-        frontier = [el for el in frontier if el.lb < cur_solution_size]
+    frontier = [el for el in frontier if el.lb < cur_solution_size]
 
-        print(cur_solution_size)
+    print(cur_solution_size)
 
-
-if __name__ == '__main__':
-    run('./Data/karate.graph')
