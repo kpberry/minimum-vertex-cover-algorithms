@@ -19,7 +19,11 @@ class BranchBound(object):
         # NetworkX returns this as a NodeView, which is bad
         self.remaining_vertices = list(remaining_vertices)
         self.vc_size = vc_size
-        self.lb = self.get_lower_bound()
+		if self.graph.number_of_nodes() > 5000:
+			self.lb = self.get_lower_bound_approx(graph.copy(), 0)
+		else:
+			self.lb = self.get_lower_bound()
+	
 
     def get_pruned_graph(self, node):
         # Copy the graph and return the modified copy
@@ -72,8 +76,24 @@ class BranchBound(object):
             # solve the problem
             result = prob.solve()
         else:
-            result = self.vc_size -1
+            result = self.vc_size - 1
         return result
+		
+	def get_lower_bound_approx(self, G, random_seed):
+		seed(random_seed)
+		c = []
+		while nx.number_of_edges(G) != 0:
+			edgesNum = nx.number_of_edges(G)
+			rN = randint(0,edgesNum - 1)
+			edges = list(G.edges())
+			e = edges[rN]
+			v1 = e[0]
+			v2 = e[1]
+			c.append(v1)
+			c.append(v2)
+			G.remove_node(v1)
+			G.remove_node(v2)
+		len(c)/2 + self.VCSize
 
 
 def read_graph(filename):
@@ -102,7 +122,7 @@ def run(filename):
     frontier.extend([root])
     cur_solution_size = inf
     while len(frontier) > 0:
-        frontier.sort(key=lambda x: x.lb, reverse=True)
+        frontier.sort(key=lambda x: x.lb)
         current = frontier.pop()
         cur_children = current.expand()
         if not cur_children:
