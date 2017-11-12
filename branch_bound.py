@@ -35,7 +35,7 @@ class BranchBound(object):
             # the right child - not include selected vertex in the set
             # self.remaining_vertices[:-1] makes a copy of the first n - 1
             #   remaining vertices instead of passing around the original list
-            
+            self.remaining_vertices.sort(key=lambda x: self.graph.degree(x))
             right_child = BranchBound(self.graph.copy(),
                                       self.remaining_vertices[:-1],
                                       self.vc_size)
