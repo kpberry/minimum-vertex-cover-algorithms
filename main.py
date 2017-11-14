@@ -1,6 +1,8 @@
 import argparse
 
 import branch_bound
+import genetics
+import hill_climbing
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -21,8 +23,9 @@ if __name__ == '__main__':
     elif alg == 'Approx':
         pass
     elif alg == 'LS1':
-        pass
+        hill_climbing.run(inst, time, seed)
     elif alg == 'LS2':
-        pass
+        print(time)
+        genetics.run(inst, time, seed)
     else:
         print('Invalid algorithm entered.')

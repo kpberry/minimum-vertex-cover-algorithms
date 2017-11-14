@@ -10,6 +10,8 @@ from random import seed, randint
 import networkx as nx
 import pip
 
+from graph_utils import read_graph
+
 pip.main(['install', 'pulp'])
 import pulp as lp
 
@@ -101,18 +103,6 @@ class BranchBound(object):
         len(c) / 2 + self.vc_size
 
 
-def read_graph(filename):
-    # reads the graph as a sparse adjacency matrix from a file
-    graph = {}
-    with open(filename, 'r') as file:
-        file.readline()
-        for i, line in enumerate(file):
-            if len(line.strip()) > 0:
-                # 1 indexing because this is matlab apparently
-                graph[i] = set(int(i) - 1 for i in line.split())
-    return graph
-
-
 def run(filename, cutoff_time, random_seed):
     seed(random_seed)
     # generate a graph
@@ -130,7 +120,9 @@ def run(filename, cutoff_time, random_seed):
     start_time = datetime.now()
     best = None
 
-    base = filename.split('/')[-1].split('.')[0]
+    base = filename.split('/')[-1].split('.')[0] \
+           + '_BnB_' + str(cutoff_time) + '_' \
+           + str(random_seed)
     with open(base + '.trace', 'w') as trace:
         while len(frontier) > 0 and datetime.now() - start_time < timedelta(
                 seconds=cutoff_time):
@@ -154,4 +146,4 @@ def run(filename, cutoff_time, random_seed):
 
     with open(base + '.sol', 'w') as sol:
         sol.write(str(best.vc_size) + '\n')
-        sol.write(','.join([str(i) for i in sorted(best.used_vertices)]))
+        sol.write(','.join([str(i + 1) for i in sorted(best.used_vertices)]))

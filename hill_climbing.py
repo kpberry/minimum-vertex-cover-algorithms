@@ -1,34 +1,38 @@
-import os
-from contextlib import suppress
 from datetime import datetime, timedelta
-from random import random, shuffle
+from random import random, shuffle, seed
 
 import numpy as np
 
+from graph_utils import read_graph
+from vc import is_solution, gen_vc, get_neighbors, eval_fitness
+
 
 def randomized_hill_climb(problem, model, get_neighbors, evaluate_fitness,
-                          gen_model, out_dir='./out/'):
-    # make the output directory
-    with suppress(FileExistsError):
-        os.mkdir(out_dir)
-    out_dir += 'rhc.csv'
-
+                          gen_model, filename, cutoff_time, random_seed):
+    seed(random_seed)
     # will be used to determine when to restart
     restart_threshold = 10
     best_so_far = None
-    most_fit = None
+    most_fit = model
+
+    smallest_vc = most_fit
 
     # this will be used to restart the search if improvements stop
     last_improvement = 0
 
-    with open(out_dir, 'w') as out:
-        out.write('mean_fitness,min_fitness,max_fitness,time,stddev_fitness\n')
+    base = filename.split('/')[-1].split('.')[0] \
+           + '_LS1_' + str(cutoff_time) + '_' \
+           + str(random_seed)
+
+    with open(base + '.trace', 'w') as trace:
         start_time = cur_time = datetime.now()
 
-        while (cur_time - start_time) < timedelta(minutes=10):
+        while (cur_time - start_time) < timedelta(seconds=cutoff_time):
             # evaluate the fitness of the current model
             cur_fitness = prev_fitness = evaluate_fitness(problem, model)
             fitnesses = [prev_fitness]
+            if is_solution(problem, model):
+                smallest_vc = min(smallest_vc, model, key=lambda k: sum(k))
 
             # get the model's neighbors in a random order
             neighbors = get_neighbors(model, problem)
@@ -61,14 +65,22 @@ def randomized_hill_climb(problem, model, get_neighbors, evaluate_fitness,
                 model = gen_model(problem)
                 last_improvement = 0
 
-            # output results
-            out.write(str(np.mean(fitnesses)) + ',')
-            out.write(str(np.min(fitnesses)) + ',')
-            out.write(str(np.max(fitnesses)) + ',')
-            out.write(str(datetime.now() - start_time) + ',')
-            out.write(str(np.std(fitnesses)) + '\n')
             cur_time = datetime.now()
-            print(cur_time - start_time)
-            print('Max fitness:', np.max(fitnesses))
-            print('Best so far:', best_so_far)
+            # log results
+            trace.write('{:0.2f}'.format(
+                (cur_time - start_time).total_seconds()
+            ))
+            trace.write(',' + str(sum(smallest_vc)) + '\n')
+        with open(base + '.sol', 'w') as sol:
+            sol.write(str(sum(smallest_vc)) + '\n')
+            sol.write(','.join([str(i + 1) for i in range(len(smallest_vc)) if
+                                smallest_vc[i] == 1]))
     return most_fit
+
+
+def run(filename, cutoff_time, random_seed):
+    seed(random_seed)
+    graph = read_graph(filename)
+    randomized_hill_climb(graph, gen_vc(graph), get_neighbors,
+                          eval_fitness, gen_vc, filename, cutoff_time,
+                          random_seed)

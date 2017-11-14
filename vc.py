@@ -1,9 +1,6 @@
 from math import log
 from random import random
 
-from genetics import simulate_genetics
-from graph_utils import read_graph
-from hill_climbing import randomized_hill_climb
 
 def crossover(a, b, graph, iterations=10):
     # TODO make this better
@@ -80,26 +77,3 @@ def eval_fitness(graph, vc):
                 covered_edges[j].add(i)
     num_covered_edges = sum(len(covered_edges[j]) for j in covered_edges)
     return num_covered_edges - num_edges - sum(vc)
-
-
-graph = read_graph('./data/Data/karate.graph')
-
-# useless fact
-max_degree = max(len(graph[g]) for g in graph)
-print(max_degree)
-print('k >= ' + str(sum(len(graph[g]) for g in graph) / max_degree))
-
-best = simulate_genetics(graph, gen_vc(graph), eval_fitness,
-                         gen_vc, crossover, mutation, num_models=3,
-                         dynamic_population=True, max_models=1000)
-print(best)
-print(sum(best))
-print(is_solution(graph, best))
-print(eval_fitness(graph, best))
-
-best = randomized_hill_climb(graph, gen_vc(graph), get_neighbors,
-                             eval_fitness, gen_vc)
-print(best)
-print(sum(best))
-print(is_solution(graph, best))
-print(eval_fitness(graph, best))
