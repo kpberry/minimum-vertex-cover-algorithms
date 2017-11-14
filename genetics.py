@@ -5,7 +5,7 @@ from random import sample
 
 import numpy as np
 
-
+# TODO switch to networkx
 def simulate_genetics(problem, model, evaluate_fitness, gen_model,
                       crossover, mutation, num_models=100,
                       dynamic_population=False, max_models=1500,
