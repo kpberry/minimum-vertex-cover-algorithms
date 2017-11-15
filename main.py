@@ -17,7 +17,6 @@ if __name__ == '__main__':
     time = args.time[0]
     seed = args.seed[0]
 
-    print(alg)
     if alg == 'BnB':
         branch_bound.run(inst, time, seed)
     elif alg == 'Approx':
@@ -29,3 +28,5 @@ if __name__ == '__main__':
         genetics.run(inst, time, seed)
     else:
         print('Invalid algorithm entered.')
+    print('Evaluation complete for ' + alg + ' on ' + inst
+          + ' with ' + str(time) + ' seconds and a seed of ' + str(seed))

@@ -54,16 +54,7 @@ def is_solution(graph, vc):
 
 
 def gen_vc(graph):
-    # generates a valid vc which is a solution to the graph
-    # vc is a list where the ith element corresponds to vertex i being in the vc
-    size = len(graph)
-    vc = [0] * size
-    while not is_solution(graph, vc):
-        # try to take around 10 steps - will overshoot a vertex cover by
-        # hopefully not very much
-        for i in range(int(size / 10) + 1):
-            vc[int(random() * size)] = 1
-    return vc
+    return [1] * (max(graph) + 1)
 
 
 def eval_fitness(graph, vc):
@@ -71,7 +62,7 @@ def eval_fitness(graph, vc):
     num_edges = sum(len(graph[j]) for j in graph)
     covered_edges = {i: set() for i in range(len(vc))}
     for i, v in enumerate(vc):
-        if v > 0:
+        if v > 0 and i in graph:
             for j in graph[i]:
                 covered_edges[i].add(j)
                 covered_edges[j].add(i)

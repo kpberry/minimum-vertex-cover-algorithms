@@ -8,14 +8,10 @@ from datetime import datetime, timedelta
 from random import seed, randint
 
 import networkx as nx
-import pip
+import pulp as lp
+from numpy import inf
 
 from graph_utils import read_graph
-
-pip.main(['install', 'pulp'])
-import pulp as lp
-
-from numpy import inf
 
 
 class BranchBound(object):
