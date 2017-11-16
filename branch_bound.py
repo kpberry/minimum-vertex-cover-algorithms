@@ -116,7 +116,7 @@ def run(filename, cutoff_time, random_seed):
     cur_solution_size = graph.number_of_nodes()
     start_time = datetime.now()
     best = None
-	best_is_set = False
+    best_is_set = False
     base = filename.split('/')[-1].split('.')[0] \
            + '_BnB_' + str(cutoff_time) + '_' \
            + str(random_seed)
@@ -131,7 +131,7 @@ def run(filename, cutoff_time, random_seed):
                     if cur_solution_size > current.vc_size:
                         cur_solution_size = current.vc_size
                         best = current
-						best_is_set = True
+                        best_is_set = True
             else:
                 frontier.extend(cur_children)
 
