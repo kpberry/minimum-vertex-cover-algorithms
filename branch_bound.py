@@ -115,7 +115,7 @@ def run(filename, cutoff_time, random_seed):
     frontier.extend([root])
     cur_solution_size = graph.number_of_nodes()
     start_time = datetime.now()
-    best = None
+    best = BranchBound(graph, graph.nodes(), [], graph.number_of_nodes())
     best_is_set = False
     base = filename.split('/')[-1].split('.')[0] \
            + '_BnB_' + str(cutoff_time) + '_' \
@@ -141,8 +141,7 @@ def run(filename, cutoff_time, random_seed):
                 (datetime.now() - start_time).total_seconds()
             ))
             trace.write(',' + str(cur_solution_size) + '\n')
-	if best_is_set == False:
-		best = current
+
     with open(base + '.sol', 'w') as sol:
         sol.write(str(best.vc_size) + '\n')
         sol.write(','.join([str(i + 1) for i in sorted(best.used_vertices)]))
