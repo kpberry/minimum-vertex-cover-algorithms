@@ -4,26 +4,27 @@ Created on Sat Nov 11 08:57:01 2017
 
 @author: Mostafa Reisi
 """
+from datetime import datetime, timedelta
+from random import seed, randint
+
 import networkx as nx
-import pip
-
-pip.main(['install', 'pulp'])
 import pulp as lp
-
 from numpy import inf
+
+from graph_utils import read_graph
 
 
 class BranchBound(object):
-    def __init__(self, graph, remaining_vertices, vc_size):
+    def __init__(self, graph, remaining_vertices, used_vertices, vc_size):
         self.graph = graph
         # NetworkX returns this as a NodeView, which is bad
+        self.used_vertices = list(used_vertices)
         self.remaining_vertices = list(remaining_vertices)
         self.vc_size = vc_size
-		if self.graph.number_of_nodes() > 5000:
-			self.lb = self.get_lower_bound_approx(graph.copy(), 0)
-		else:
-			self.lb = self.get_lower_bound()
-	
+        if self.graph.number_of_nodes() > 5000:
+            self.lb = self.get_lower_bound_approx(graph.copy(), 0)
+        else:
+            self.lb = self.get_lower_bound()
 
     def get_pruned_graph(self, node):
         # Copy the graph and return the modified copy
@@ -42,6 +43,7 @@ class BranchBound(object):
             self.remaining_vertices.sort(key=lambda x: self.graph.degree(x))
             right_child = BranchBound(self.graph.copy(),
                                       self.remaining_vertices[:-1],
+                                      self.used_vertices,
                                       self.vc_size)
             # prune the graph. self.remaining_vertices[-1] gets the last
             # vertex in the remaining_vertices
@@ -54,6 +56,8 @@ class BranchBound(object):
             # left child - include the selected node in the set
             left_child = BranchBound(pruned_graph,
                                      remaining_pruned_vertices,
+                                     self.used_vertices
+                                     + [self.remaining_vertices[-1]],
                                      self.vc_size + 1)
             return [left_child, right_child]
         else:
@@ -78,6 +82,7 @@ class BranchBound(object):
         else:
             result = self.vc_size - 1
         return result
+<<<<<<< HEAD
 		
 	def get_lower_bound_approx(self, G, random_seed):
 		seed(random_seed)
@@ -139,3 +144,66 @@ class BranchBound(object):
 
 if __name__ == '__main__':
     run('./Data/karate.graph')
+=======
+
+    def get_lower_bound_approx(self, G, random_seed):
+        c = []
+        while nx.number_of_edges(G) != 0:
+            edgesNum = nx.number_of_edges(G)
+            rN = randint(0, edgesNum - 1)
+            edges = list(G.edges())
+            e = edges[rN]
+            v1 = e[0]
+            v2 = e[1]
+            c.append(v1)
+            c.append(v2)
+            G.remove_node(v1)
+            G.remove_node(v2)
+        len(c) / 2 + self.vc_size
+
+
+def run(filename, cutoff_time, random_seed):
+    seed(random_seed)
+    # generate a graph
+    graph = nx.Graph()
+    # convert the input graph into an nx graph
+    input_graph = read_graph(filename)
+    graph.add_nodes_from([i for i in input_graph])
+    for j in input_graph:
+        graph.add_edges_from([(j, i) for i in input_graph[j]])
+
+    root = BranchBound(graph, graph.nodes(), [], 0)
+    frontier = []
+    frontier.extend([root])
+    cur_solution_size = inf
+    start_time = datetime.now()
+    best = None
+
+    base = filename.split('/')[-1].split('.')[0] \
+           + '_BnB_' + str(cutoff_time) + '_' \
+           + str(random_seed)
+    with open(base + '.trace', 'w') as trace:
+        while len(frontier) > 0 and datetime.now() - start_time < timedelta(
+                seconds=cutoff_time):
+            frontier.sort(key=lambda x: x.lb)
+            current = frontier.pop()
+            cur_children = current.expand()
+            if not cur_children:
+                if not current.graph.nodes():
+                    if cur_solution_size > current.vc_size:
+                        cur_solution_size = current.vc_size
+                        best = current
+            else:
+                frontier.extend(cur_children)
+
+            frontier = [el for el in frontier if el.lb < cur_solution_size]
+
+            trace.write('{:0.2f}'.format(
+                (datetime.now() - start_time).total_seconds()
+            ))
+            trace.write(',' + str(cur_solution_size) + '\n')
+
+    with open(base + '.sol', 'w') as sol:
+        sol.write(str(best.vc_size) + '\n')
+        sol.write(','.join([str(i + 1) for i in sorted(best.used_vertices)]))
+>>>>>>> 2e6f80c8238f9194cddca0f12c3563076f5c737a

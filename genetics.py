@@ -1,40 +1,42 @@
-import os
-from contextlib import suppress
 from datetime import datetime, timedelta
-from random import sample
+from random import sample, seed
 
-import numpy as np
+# TODO switch to networkx
+from graph_utils import read_graph
+from vc import is_solution, eval_fitness, gen_vc, crossover, mutation
 
 
-def simulate_genetics(problem, model, evaluate_fitness, gen_model,
-                      crossover, mutation, num_models=100,
-                      dynamic_population=False, max_models=1500,
-                      out_dir='./out/'):
-    # make the output directory
-    with suppress(FileExistsError):
-        os.mkdir(out_dir)
-    out_dir += 'ga.csv'
-
+def simulate_genetics(problem, model, evaluate_fitness, gen_model, crossover,
+                      mutation, filename, cutoff_time, num_models=100,
+                      dynamic_population=False, max_models=1500, random_seed=0):
+    seed(random_seed)
     most_fit = model
 
     # these will be used to determine if the exploration rate is too slow
     last_improvement = 0
+    smallest_vc = most_fit
     best_so_far = None
 
+    base = filename.split('/')[-1].split('.')[0] \
+           + '_LS2_' + str(cutoff_time) + '_' \
+           + str(random_seed)
     # TODO increase the number of models when the improvement rate slows a lot
-    with open(out_dir, 'w') as out:
-        out.write('mean_fitness,min_fitness,max_fitness,time,stddev_fitness\n')
+    with open(base + '.trace', 'w') as trace:
         start_time = cur_time = datetime.now()
 
         # generate the initial population
         models = [gen_model(problem) for _ in range(num_models)]
 
-        while (cur_time - start_time) < timedelta(minutes=10):
+        while (cur_time - start_time) < timedelta(seconds=cutoff_time):
             # calculate the fitness of each model
             fitnesses = [(m, evaluate_fitness(problem, m)) for m in models]
             fitnesses = sorted(fitnesses, key=lambda s: s[1], reverse=True)
 
             most_fit, max_fitness = fitnesses[0]
+            smallest_vc = min(smallest_vc, min([i for i in models if
+                                                is_solution(problem, i)],
+                                               key=lambda k: sum(k)),
+                              key=lambda k: sum(k))
 
             # get the parents - 2 random models and the best 30% of the others
             parents = sample(models, 2)
@@ -78,14 +80,23 @@ def simulate_genetics(problem, model, evaluate_fitness, gen_model,
                           + str(decrease) + '.')
                     last_improvement = 0
 
-            # log results
-            fitnesses = [f[1] for f in fitnesses]
-            out.write(str(np.mean(fitnesses)) + ',')
-            out.write(str(min(fitnesses)) + ',')
-            out.write(str(max(fitnesses)) + ',')
-            out.write(str(datetime.now() - cur_time) + ',')
-            out.write(str(np.std(fitnesses)) + '\n')
             cur_time = datetime.now()
-            print(cur_time - start_time)
-            print('Max fitness:', max(fitnesses))
+            # log results
+            trace.write('{:0.2f}'.format(
+                (cur_time - start_time).total_seconds()
+            ))
+            trace.write(',' + str(sum(smallest_vc)) + '\n')
+    with open(base + '.sol', 'w') as sol:
+        sol.write(str(sum(smallest_vc)) + '\n')
+        sol.write(','.join([str(i + 1) for i in range(len(smallest_vc)) if
+                            smallest_vc[i] == 1]))
     return most_fit
+
+
+def run(filename, cutoff_time, random_seed):
+    seed(random_seed)
+    graph = read_graph(filename)
+    simulate_genetics(graph, gen_vc(graph), eval_fitness, gen_vc,
+                      crossover, mutation, filename, cutoff_time,
+                      num_models=3, dynamic_population=True,
+                      max_models=1000, random_seed=random_seed)
