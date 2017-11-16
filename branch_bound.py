@@ -93,48 +93,48 @@ class BranchBound(object):
 			c.append(v2)
 			G.remove_node(v1)
 			G.remove_node(v2)
-		len(c)/2 + self.VCSize
+		return len(c)/2 + self.vc_size
 
 
-def read_graph(filename):
-    # reads the graph as a sparse adjacency matrix from a file
-    graph = {}
-    with open(filename, 'r') as file:
-        file.readline()
-        for i, line in enumerate(file):
-            if len(line.strip()) > 0:
-                # 1 indexing because this is matlab apparently
-                graph[i] = set(int(i) - 1 for i in line.split())
-    return graph
+	def read_graph(filename):
+		# reads the graph as a sparse adjacency matrix from a file
+		graph = {}
+		with open(filename, 'r') as file:
+			file.readline()
+			for i, line in enumerate(file):
+				if len(line.strip()) > 0:
+					# 1 indexing because this is matlab apparently
+					graph[i] = set(int(i) - 1 for i in line.split())
+		return graph
 
 
-def run(filename):
-    # generate a graph
-    graph = nx.Graph()
-    # convert the input graph into an nx graph
-    input_graph = read_graph(filename)
-    graph.add_nodes_from([i for i in input_graph])
-    for j in input_graph:
-        graph.add_edges_from([(j, i) for i in input_graph[j]])
+	def run(filename):
+		# generate a graph
+		graph = nx.Graph()
+		# convert the input graph into an nx graph
+		input_graph = read_graph(filename)
+		graph.add_nodes_from([i for i in input_graph])
+		for j in input_graph:
+			graph.add_edges_from([(j, i) for i in input_graph[j]])
 
-    root = BranchBound(graph, graph.nodes(), 0)
-    frontier = []
-    frontier.extend([root])
-    cur_solution_size = inf
-    while len(frontier) > 0:
-        frontier.sort(key=lambda x: x.lb)
-        current = frontier.pop()
-        cur_children = current.expand()
-        if not cur_children:
-            if not current.graph.nodes():
-                if cur_solution_size > current.vc_size:
-                    cur_solution_size = current.vc_size
-        else:
-            frontier.extend(cur_children)
+		root = BranchBound(graph, graph.nodes(), 0)
+		frontier = []
+		frontier.extend([root])
+		cur_solution_size = inf
+		while len(frontier) > 0:
+			frontier.sort(key=lambda x: x.lb)
+			current = frontier.pop()
+			cur_children = current.expand()
+			if not cur_children:
+				if not current.graph.nodes():
+					if cur_solution_size > current.vc_size:
+						cur_solution_size = current.vc_size
+			else:
+				frontier.extend(cur_children)
 
-        frontier = [el for el in frontier if el.lb < cur_solution_size]
+			frontier = [el for el in frontier if el.lb < cur_solution_size]
 
-        print(cur_solution_size)
+			print(cur_solution_size)
 
 
 if __name__ == '__main__':
