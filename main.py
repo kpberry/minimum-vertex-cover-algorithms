@@ -24,7 +24,6 @@ if __name__ == '__main__':
     elif alg == 'LS1':
         hill_climbing.run(inst, time, seed)
     elif alg == 'LS2':
-        print(time)
         genetics.run(inst, time, seed)
     else:
         print('Invalid algorithm entered.')
