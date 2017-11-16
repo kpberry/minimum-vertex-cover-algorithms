@@ -144,4 +144,3 @@ def run(filename, cutoff_time, random_seed):
     with open(base + '.sol', 'w') as sol:
         sol.write(str(best.vc_size) + '\n')
         sol.write(','.join([str(i + 1) for i in sorted(best.used_vertices)]))
-

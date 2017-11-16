@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-for algo in LS1 LS2;
+for algo in BnB;
 do
     mkdir ${algo}
     for filename in ./data/Data/*.graph; do
@@ -7,7 +7,7 @@ do
         do
             echo ${filename}
             echo ${algo}
-            python3 main.py -inst ${filename} -alg ${algo} -seed $i -time 600
+            python2 main.py -inst ${filename} -alg ${algo} -seed $i -time 3600
         done
         mv *.trace *.sol ${algo}/
     done
