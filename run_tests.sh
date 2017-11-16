@@ -7,7 +7,7 @@ do
         do
             echo ${filename}
             echo ${algo}
-            python2 main.py -inst ${filename} -alg ${algo} -seed $i -time 3600
+            python main.py -inst ${filename} -alg ${algo} -seed $i -time 3600
         done
         mv *.trace *.sol ${algo}/
     done
