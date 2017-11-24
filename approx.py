@@ -7,7 +7,7 @@ from graph_utils import read_graph, copy_graph
 def run(filename, cutoff_time, random_seed):
     seed(random_seed)
     graph = read_graph(filename)
-    greedy_vc(graph, filename, cutoff_time, random_seed)
+    return greedy_vc(graph, filename, cutoff_time, random_seed)
 
 
 def vertex_quality_getter(graph):

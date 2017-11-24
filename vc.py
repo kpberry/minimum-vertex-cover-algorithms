@@ -1,6 +1,8 @@
 from math import log
 from random import random
 
+from graph_utils import get_edges
+
 
 def crossover(a, b, graph, iterations=10):
     # TODO make this better
@@ -45,16 +47,37 @@ def get_neighbors(vc, graph, iterations=10, degree=None):
 
 
 def is_solution(graph, vc):
-    # returns false if any edge does not have an endpoint in vc
-    for v in graph:
-        for u in graph[v]:
-            if vc[v] + vc[u] == 0:
-                return False
+    for u, v in get_edges(graph):
+        if vc[u] + vc[v] == 0:
+            return False
     return True
 
 
-def gen_vc(graph):
-    return [1] * (max(graph) + 1)
+def construct_vc(graph, return_losses=False):
+    vc = [0] * (max(graph) + 1)
+    edges = get_edges(graph)
+    for u, v in edges:
+        if vc[u] + vc[v] == 0:
+            vc[max(u, v, key=lambda x: len(graph[x]))] = 1
+
+    losses = [0] * len(vc)
+    for u, v in edges:
+        if vc[u] + vc[v] == 1:
+            if vc[u] > vc[v]:
+                losses[u] += 1
+            else:
+                losses[v] += 1
+
+    for u in range(len(vc)):
+        if losses[u] == 0:
+            vc[u] = 0
+            if u in graph:
+                for v in graph[u]:
+                    losses[v] += 1
+
+    if return_losses:
+        return vc, losses
+    return vc
 
 
 def eval_fitness(graph, vc):
