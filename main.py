@@ -2,6 +2,7 @@ import argparse
 
 import branch_bound
 import hill_climbing
+import genetics
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
