@@ -1,19 +1,18 @@
 from datetime import datetime, timedelta
 from random import random, shuffle, seed
 
-import numpy as np
-
+from approx import greedy_vc
 from graph_utils import read_graph
-from vc import is_solution, gen_vc, get_neighbors, eval_fitness
+from vc import is_solution, get_neighbors, eval_fitness
 
 
-def randomized_hill_climb(problem, model, get_neighbors, evaluate_fitness,
+def randomized_hill_climb(problem, get_neighbors, evaluate_fitness,
                           gen_model, filename, cutoff_time, random_seed):
     seed(random_seed)
     # will be used to determine when to restart
     restart_threshold = 10
     best_so_far = None
-    most_fit = model
+    most_fit = model = gen_model(problem)
 
     smallest_vc = most_fit
 
@@ -49,8 +48,8 @@ def randomized_hill_climb(problem, model, get_neighbors, evaluate_fitness,
                     break
 
             # keep track of the best model so far
-            if best_so_far is None or np.max(fitnesses) > best_so_far:
-                best_so_far = np.max(fitnesses)
+            if best_so_far is None or max(fitnesses) > best_so_far:
+                best_so_far = max(fitnesses)
                 most_fit = model
 
             # keep track of whether or not the model improved
@@ -81,6 +80,5 @@ def randomized_hill_climb(problem, model, get_neighbors, evaluate_fitness,
 def run(filename, cutoff_time, random_seed):
     seed(random_seed)
     graph = read_graph(filename)
-    randomized_hill_climb(graph, gen_vc(graph), get_neighbors,
-                          eval_fitness, gen_vc, filename, cutoff_time,
-                          random_seed)
+    randomized_hill_climb(graph, get_neighbors, eval_fitness, greedy_vc,
+                          filename, cutoff_time, random_seed)

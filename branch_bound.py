@@ -9,11 +9,10 @@ from random import seed, randint
 
 import networkx as nx
 import pulp as lp
-from numpy import inf
 
 from graph_utils import read_graph
 
-
+#TODO use greedy vc as starting point
 class BranchBound(object):
     def __init__(self, graph, remaining_vertices, used_vertices, vc_size):
         self.graph = graph

@@ -1,16 +1,17 @@
 from datetime import datetime, timedelta
-from random import sample, seed
+from random import sample, seed, choice
 
 # TODO switch to networkx
+from approx import greedy_vc
 from graph_utils import read_graph
-from vc import is_solution, eval_fitness, gen_vc, crossover, mutation
+from vc import is_solution, eval_fitness, crossover, mutation
 
 
-def simulate_genetics(problem, model, evaluate_fitness, gen_model, crossover,
+def simulate_genetics(problem, evaluate_fitness, gen_model, crossover,
                       mutation, filename, cutoff_time, num_models=100,
                       dynamic_population=False, max_models=1500, random_seed=0):
     seed(random_seed)
-    most_fit = model
+    most_fit = gen_model(problem)
 
     # these will be used to determine if the exploration rate is too slow
     last_improvement = 0
@@ -45,8 +46,10 @@ def simulate_genetics(problem, model, evaluate_fitness, gen_model, crossover,
             # keep the best model
             models = [most_fit]
             # add the offspring of the parents
+
             models += [
-                mutation(crossover(*sample(parents, 2), problem), problem)
+                mutation(crossover(choice(parents), choice(parents), problem),
+                         problem)
                 for _ in range(num_models - len(models))
             ]
             # make sure we have the correct number of models
@@ -96,7 +99,7 @@ def simulate_genetics(problem, model, evaluate_fitness, gen_model, crossover,
 def run(filename, cutoff_time, random_seed):
     seed(random_seed)
     graph = read_graph(filename)
-    simulate_genetics(graph, gen_vc(graph), eval_fitness, gen_vc,
+    simulate_genetics(graph, eval_fitness, greedy_vc,
                       crossover, mutation, filename, cutoff_time,
                       num_models=3, dynamic_population=True,
                       max_models=1000, random_seed=random_seed)

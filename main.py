@@ -1,9 +1,9 @@
 import argparse
 
-import branch_bound
-import hill_climbing
-import genetics
 import approx
+import branch_bound
+import genetics
+import hill_climbing
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

@@ -7,3 +7,6 @@ def read_graph(filename):
                 # 1 indexing because this is matlab apparently
                 graph[i] = set(int(i) - 1 for i in line.split())
     return graph
+
+def copy_graph(graph):
+    return {u: set(v for v in graph[u]) for u in graph}

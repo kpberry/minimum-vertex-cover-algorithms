@@ -1,7 +1,5 @@
 from math import log
-from random import random, seed, randint, choice
-import networkx as nx
-from datetime import datetime
+from random import random
 
 
 def crossover(a, b, graph, iterations=10):
@@ -56,30 +54,7 @@ def is_solution(graph, vc):
 
 
 def gen_vc(graph):
-    result = [0] * (max(graph) + 1)
-    copy = {v: set([i for i in graph[v]]) for v in graph}
-    for i in greedy_vc(copy):
-        result[i] = 1
-    return result
-
-
-def greedy_vc(graph):
-    t = datetime.now()
-    c = []
-    while True:
-        num_vertices = len(graph)
-        if num_vertices == 0:
-            print(datetime.now() - t)
-            print(len(c))
-            return c
-        best = max(list(graph.keys()), key=lambda x: len(graph[x]) * random() * 2)
-        c += [best]
-        for i in graph[best]:
-            graph[i].remove(best)
-            if len(graph[i]) == 0:
-                del graph[i]
-        del graph[best]
-
+    return [1] * (max(graph) + 1)
 
 
 def eval_fitness(graph, vc):
