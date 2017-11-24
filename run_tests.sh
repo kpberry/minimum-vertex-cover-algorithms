@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-for algo in LS1 LS2;
+for algo in LS1 LS2 Approx;
 do
     mkdir ${algo}
     for filename in ./data/Data/*.graph; do

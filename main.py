@@ -3,6 +3,7 @@ import argparse
 import branch_bound
 import hill_climbing
 import genetics
+import approx
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -20,7 +21,7 @@ if __name__ == '__main__':
     if alg == 'BnB':
         branch_bound.run(inst, time, seed)
     elif alg == 'Approx':
-        pass
+        approx.run(inst, time, seed)
     elif alg == 'LS1':
         hill_climbing.run(inst, time, seed)
     elif alg == 'LS2':
