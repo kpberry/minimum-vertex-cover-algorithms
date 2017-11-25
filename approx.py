@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from random import seed
 
 from graph_utils import read_graph, copy_graph
+from vc import construct_vc
 
 
 def run(filename, cutoff_time, random_seed):
@@ -19,6 +20,7 @@ def vertex_quality_getter(graph):
 
 def greedy_vc(graph, filename=None, cutoff_time=None, random_seed=None):
     graph = copy_graph(graph)
+    fast = construct_vc(graph)
     if random_seed is not None:
         seed(random_seed)
     start_time = cur_time = datetime.now()
@@ -43,6 +45,8 @@ def greedy_vc(graph, filename=None, cutoff_time=None, random_seed=None):
         del graph[best]
         cur_time = datetime.now()
 
+    vc = min(vc, fast, key=lambda x: sum(x))
+
     if base is not None:
         with open(base + '.trace', 'w') as trace:
             trace.write('{:0.2f}'.format(
@@ -54,4 +58,5 @@ def greedy_vc(graph, filename=None, cutoff_time=None, random_seed=None):
             sol.write(
                 ','.join([str(i + 1) for i in range(len(vc)) if
                           vc[i] == 1]))
+
     return vc
