@@ -32,20 +32,6 @@ def mutation(vc, graph, iterations=10, degree=None):
     return vc
 
 
-def get_neighbors(vc, graph, iterations=10, degree=None):
-    # same procedure as mutation, but adds all solutions to a list of results
-    results = []
-    if degree is None:
-        degree = log(len(vc)) / log(2)
-    while len(results) < iterations:
-        gene_copy = [i for i in vc]
-        for _ in range(int(random() * degree + 1)):
-            gene_copy[int(random() * len(vc))] ^= 1
-        if is_solution(graph, gene_copy):
-            results.append(gene_copy)
-    return results
-
-
 def is_solution(graph, vc):
     for u, v in get_edges(graph):
         if vc[u] + vc[v] == 0:
@@ -82,12 +68,6 @@ def construct_vc(graph, return_losses=False):
 
 def eval_fitness(graph, vc):
     # get the total number of edges to cover vs. the number covered by vc
-    num_edges = sum(len(graph[j]) for j in graph)
-    covered_edges = {i: set() for i in range(len(vc))}
-    for i, v in enumerate(vc):
-        if v > 0 and i in graph:
-            for j in graph[i]:
-                covered_edges[i].add(j)
-                covered_edges[j].add(i)
-    num_covered_edges = sum(len(covered_edges[j]) for j in covered_edges)
-    return num_covered_edges - num_edges - sum(vc)
+    edges = get_edges(graph)
+    covered_edges = [e for e in edges if vc[e[0]] + vc[e[1]] > 0]
+    return len(covered_edges) - len(edges) - sum(vc)

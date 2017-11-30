@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
-from random import seed
+from random import seed, choice
 
-from graph_utils import read_graph, copy_graph
-from vc import construct_vc
+from graph_utils import read_graph, copy_graph, get_edges, remove_vertices, \
+    remove_isolates
+from vc import construct_vc, is_solution
 
 
 def run(filename, cutoff_time, random_seed):
@@ -16,6 +17,17 @@ def vertex_quality_getter(graph):
         return len(graph[x]) / min([len(graph[i]) for i in graph[x]])
 
     return vertex_quality
+
+
+def random_vc(graph):
+    seed(0)
+    vc = [0] * (max(graph) + 1)
+    while len(graph) > 0:
+        u = choice(list(graph.keys()))
+        v = choice(list(graph[u]))
+        graph = remove_isolates(remove_vertices(graph, (u, v)))
+        vc[u] = vc[v] = 1
+    return vc
 
 
 def greedy_vc(graph, filename=None, cutoff_time=None, random_seed=None):

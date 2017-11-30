@@ -23,6 +23,7 @@ def get_uncovered_edge(edges, vc):
 
 
 def fast_vc(graph):
+    print('finding fastvc...')
     vc, losses = construct_vc(graph, return_losses=True)
     gains = [0] * len(vc)
     edges = get_edges(graph)
@@ -30,7 +31,7 @@ def fast_vc(graph):
 
     t0 = datetime.now()
     inf = float('inf')
-    while datetime.now() - t0 < timedelta(seconds=600):
+    while datetime.now() - t0 < timedelta(seconds=1):
         if is_solution(graph, vc):
             print(sum(vc))
             best = [i for i in vc]
@@ -60,4 +61,5 @@ def fast_vc(graph):
                 gains[v] -= 1
             else:
                 losses[v] -= 1
+    print('Fast vc found')
     return best

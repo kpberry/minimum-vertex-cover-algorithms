@@ -20,7 +20,7 @@ class BranchBound(object):
         self.used_vertices = list(used_vertices)
         self.remaining_vertices = list(remaining_vertices)
         self.vc_size = vc_size
-        if self.graph.number_of_nodes() > 5000:
+        if self.graph.number_of_nodes() > 500:
             self.lb = self.get_lower_bound_approx(graph.copy(), 0)
         else:
             self.lb = self.get_lower_bound()
@@ -65,8 +65,8 @@ class BranchBound(object):
     def get_lower_bound(self):
         # solve a linear programming to find the lowerbound
         graph = self.graph  # we use this graph to set up a LP problem
-        nodes = graph.nodes()
-        edges = graph.edges()
+        nodes = list(graph.nodes())
+        edges = list(graph.edges())
         if nodes:
             prob = lp.LpProblem('VC', lp.LpMinimize)
             x = lp.LpVariable.dict('x', nodes, lowBound=0)
@@ -77,7 +77,8 @@ class BranchBound(object):
                 if n not in self.remaining_vertices:
                     prob += (x[n] <= 0)
             # solve the problem
-            result = prob.solve()
+            prob.solve()
+            result = sum([lp.value(x[i]) for i in x])
         else:
             result = self.vc_size - 1
         return result
@@ -122,7 +123,9 @@ def run(filename, cutoff_time, random_seed):
     with open(base + '.trace', 'w') as trace:
         while len(frontier) > 0 and datetime.now() - start_time < timedelta(
                 seconds=cutoff_time):
+            print(best.vc_size)
             frontier.sort(key=lambda x: x.lb)
+            print([x.lb for x in frontier])
             current = frontier.pop()
             cur_children = current.expand()
             if not cur_children:
@@ -144,3 +147,6 @@ def run(filename, cutoff_time, random_seed):
     with open(base + '.sol', 'w') as sol:
         sol.write(str(best.vc_size) + '\n')
         sol.write(','.join([str(i + 1) for i in sorted(best.used_vertices)]))
+
+if __name__ == '__main__':
+    run('./data/Data/karate.graph', 100, 0)

@@ -22,6 +22,16 @@ def get_edges(graph):
     )))
 
 
+def remove_vertices(graph, vertices):
+    return {u: set(v for v in graph[u] if not v in vertices) for u in graph if
+            not u in vertices}
+
+
+def remove_isolates(graph):
+    return {u: set(v for v in graph[u] if len(graph[v]) > 0) for u in graph if
+            len(graph[u]) > 0}
+
+
 if __name__ == '__main__':
     g = read_graph('./data/Data/karate.graph')
     print(len(get_edges(g)))
