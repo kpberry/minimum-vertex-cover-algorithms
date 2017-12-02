@@ -1,15 +1,14 @@
 from datetime import datetime, timedelta
 from random import seed, choice
 
-from graph_utils import read_graph, copy_graph, get_edges, remove_vertices, \
-    remove_isolates
-from vc import construct_vc, is_solution
+from graph_utils import read_graph, copy_graph, remove_vertices, remove_isolates
+from vc import construct_vc
 
 
 def run(filename, cutoff_time, random_seed):
     seed(random_seed)
     graph = read_graph(filename)
-    return greedy_vc(graph, filename, cutoff_time, random_seed)
+    return greedy_vc(graph, filename, cutoff_time)
 
 
 def vertex_quality_getter(graph):
@@ -30,18 +29,16 @@ def random_vc(graph):
     return vc
 
 
-def greedy_vc(graph, filename=None, cutoff_time=None, random_seed=None):
+def greedy_vc(graph, filename=None, cutoff_time=None):
     graph = copy_graph(graph)
-    fast = construct_vc(graph)
-    if random_seed is not None:
-        seed(random_seed)
     start_time = cur_time = datetime.now()
+    fast = construct_vc(graph)
+    rand = construct_vc(graph)
     vc = [0] * (max(graph) + 1)
     base = None
     if filename is not None:
         base = filename.split('/')[-1].split('.')[0] \
-               + '_Approx_' + str(cutoff_time) + '_' \
-               + str(random_seed)
+               + '_Approx_' + str(cutoff_time)
 
     while cutoff_time is None or \
                     (cur_time - start_time) < timedelta(seconds=cutoff_time):
@@ -57,7 +54,7 @@ def greedy_vc(graph, filename=None, cutoff_time=None, random_seed=None):
         del graph[best]
         cur_time = datetime.now()
 
-    vc = min(vc, fast, key=lambda x: sum(x))
+    vc = min([vc, fast, rand], key=lambda x: sum(x))
 
     if base is not None:
         with open(base + '.trace', 'w') as trace:
