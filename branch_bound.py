@@ -4,7 +4,7 @@ from random import seed
 
 from approx import random_vc
 from graph_utils import read_graph, remove_vertices, remove_isolates
-from vc import is_solution
+from vc import is_solution, construct_vc
 
 
 def get_lower_bound(graph, vc, unassigned):
@@ -96,4 +96,4 @@ def run(filename, cutoff_time, random_seed):
 
 
 if __name__ == '__main__':
-    print(sum(run('./data/Data/jazz.graph', 100)))
+    print(sum(run('./data/Data/star.graph', 100, 0)))

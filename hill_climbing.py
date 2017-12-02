@@ -27,13 +27,7 @@ def get_neighbors(vc, graph, graph_is_solution, iterations=10, degree=2):
                 copy[int(random() * len(vc))] = 0
             yield copy
     else:
-        ones = []
-        zeroes = []
-        for i in range(len(vc)):
-            if vc[i] == 1:
-                ones.append(i)
-            else:
-                zeroes.append(i)
+        zeroes = [i for i in range(len(vc)) if vc[i] == 1]
         for i in range(iterations):
             copy = [v for v in vc]
             for i in range(int(random() * degree) + 1):
@@ -47,7 +41,6 @@ def randomized_hill_climb(problem, gen_model, filename, cutoff_time,
     degree = 0
     most_fit = model = gen_model(problem)
     best_so_far = fitness = eval_fitness(problem, model)
-    best_sum = sum(most_fit)
 
     base = filename.split('/')[-1].split('.')[0] \
            + '_LS1_' + str(cutoff_time) + '_' \
@@ -58,12 +51,10 @@ def randomized_hill_climb(problem, gen_model, filename, cutoff_time,
     with open(base + '.trace', 'w') as trace:
         start_time = cur_time = datetime.now()
 
-        prev_fitness = eval_fitness(problem, model)
         while (cur_time - start_time) < timedelta(seconds=cutoff_time):
             neighbor = get_close_neighbor(model, problem)
 
             if neighbor is not None and model_is_solution:
-                # assert(sum(neighbor) < sum(model))
                 model = neighbor
                 if random() > 0.99:
                     fitness = eval_fitness(problem, neighbor)
@@ -76,7 +67,6 @@ def randomized_hill_climb(problem, gen_model, filename, cutoff_time,
                     ))
                     trace.write(',' + str(sum(most_fit)) + '\n')
             else:
-                print('-------------------------------------------------')
                 # get the model's neighbors in a random order
                 neighbors = get_neighbors(model, problem, model_is_solution,
                                           degree=degree)

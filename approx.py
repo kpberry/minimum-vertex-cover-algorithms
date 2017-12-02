@@ -34,7 +34,7 @@ def greedy_vc(graph, filename=None, cutoff_time=None):
     graph = copy_graph(graph)
     start_time = cur_time = datetime.now()
     fast = construct_vc(graph)
-    rand = construct_vc(graph)
+    rand = random_vc(graph)
     vc = [0] * (max(graph) + 1)
     base = None
     if filename is not None:

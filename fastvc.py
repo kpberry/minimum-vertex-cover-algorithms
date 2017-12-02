@@ -87,4 +87,4 @@ def run(filename, cutoff_time, random_seed):
 
 
 if __name__ == '__main__':
-    run('./data/Data/star.graph', 600, 0)
+    run('./data/Data/star.graph', 6, 0)
