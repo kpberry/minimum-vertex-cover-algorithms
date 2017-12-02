@@ -33,9 +33,10 @@ def mutation(vc, graph, iterations=10, degree=None):
 
 
 def is_solution(graph, vc):
-    for u, v in get_edges(graph):
-        if vc[u] + vc[v] == 0:
-            return False
+    for u in graph:
+        for v in graph[u]:
+            if vc[u] + vc[v] == 0:
+                return False
     return True
 
 
@@ -68,6 +69,15 @@ def construct_vc(graph, return_losses=False):
 
 def eval_fitness(graph, vc):
     # get the total number of edges to cover vs. the number covered by vc
-    edges = get_edges(graph)
-    covered_edges = [e for e in edges if vc[e[0]] + vc[e[1]] > 0]
-    return len(covered_edges) - len(edges) - sum(vc)
+    covered_edges = 0
+    num_edges = sum([len(graph[i]) for i in graph])
+    marked = [False] * len(vc)
+    for u in graph:
+        if not marked[u]:
+            for v in graph[u]:
+                if not marked[v]:
+                    if vc[u] + vc[v] > 0:
+                        covered_edges += 1
+                        marked[u] = True
+                        marked[v] = True
+    return covered_edges - sum(vc) + len(vc)

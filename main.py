@@ -2,7 +2,7 @@ import argparse
 
 import approx
 import branch_bound
-import genetics
+import fastvc
 import hill_climbing
 
 if __name__ == '__main__':
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     elif alg == 'LS1':
         hill_climbing.run(inst, time, seed)
     elif alg == 'LS2':
-        genetics.run(inst, time, seed)
+        fastvc.run(inst, time, seed)
     else:
         print('Invalid algorithm entered.')
     print('Evaluation complete for ' + alg + ' on ' + inst

@@ -3,14 +3,13 @@ from heapq import heappush, heappop, nsmallest
 
 from approx import random_vc
 from graph_utils import read_graph, remove_vertices, remove_isolates
-from vc import is_solution, construct_vc
+from vc import is_solution
 
 
 def get_lower_bound(graph, vc, unassigned):
     ones = [i for i in range(len(vc)) if vc[i] == 1 and not i in unassigned]
     pruned = remove_isolates(remove_vertices(graph, ones))
     result = len(ones) + sum(random_vc(pruned)) / 2
-
     return result
 
 
@@ -68,7 +67,7 @@ def branch_bound(graph, filename, cutoff_time):
 
         remove_start = len(frontier)
         for i in range(len(frontier)):
-            if frontier[i][0] > lb:
+            if frontier[i][0] > best_vc_value:
                 remove_start = i + 1
         frontier = nsmallest(remove_start, frontier)
 
@@ -95,4 +94,4 @@ def run(filename, cutoff_time):
 
 
 if __name__ == '__main__':
-    print(sum(run('./data/Data/email.graph', 100)))
+    print(sum(run('./data/Data/jazz.graph', 100)))
