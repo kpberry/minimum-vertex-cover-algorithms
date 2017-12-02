@@ -1,152 +1,99 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Nov 11 08:57:01 2017
+from datetime import datetime
+from heapq import heappush, heappop, nsmallest
+from random import seed
 
-@author: Mostafa Reisi
-"""
-from datetime import datetime, timedelta
-from random import seed, randint
-
-import networkx as nx
-import pulp as lp
-
-from graph_utils import read_graph
-
-#TODO use greedy vc as starting point
-class BranchBound(object):
-    def __init__(self, graph, remaining_vertices, used_vertices, vc_size):
-        self.graph = graph
-        # NetworkX returns this as a NodeView, which is bad
-        self.used_vertices = list(used_vertices)
-        self.remaining_vertices = list(remaining_vertices)
-        self.vc_size = vc_size
-        if self.graph.number_of_nodes() > 500:
-            self.lb = self.get_lower_bound_approx(graph.copy(), 0)
-        else:
-            self.lb = self.get_lower_bound()
-
-    def get_pruned_graph(self, node):
-        # Copy the graph and return the modified copy
-        graph = self.graph.copy()
-        graph.remove_node(node)
-        # Have to put this in a list to prevent modification of a lazy iterator
-        isolates = list(nx.isolates(graph))
-        graph.remove_nodes_from(isolates)
-        return graph
-
-    def expand(self):
-        if len(self.remaining_vertices) > 0:
-            # the right child - not include selected vertex in the set
-            # self.remaining_vertices[:-1] makes a copy of the first n - 1
-            #   remaining vertices instead of passing around the original list
-            self.remaining_vertices.sort(key=lambda x: self.graph.degree(x))
-            right_child = BranchBound(self.graph.copy(),
-                                      self.remaining_vertices[:-1],
-                                      self.used_vertices,
-                                      self.vc_size)
-            # prune the graph. self.remaining_vertices[-1] gets the last
-            # vertex in the remaining_vertices
-            pruned_graph = self.get_pruned_graph(self.remaining_vertices[-1])
-            pruned_vertices = set(pruned_graph.nodes())
-            # make sure that we only use remaining vertices after pruning
-            remaining_pruned_vertices = list(
-                pruned_vertices.intersection(self.remaining_vertices[:-1])
-            )
-            # left child - include the selected node in the set
-            left_child = BranchBound(pruned_graph,
-                                     remaining_pruned_vertices,
-                                     self.used_vertices
-                                     + [self.remaining_vertices[-1]],
-                                     self.vc_size + 1)
-            return [left_child, right_child]
-        else:
-            return []
-
-    def get_lower_bound(self):
-        # solve a linear programming to find the lowerbound
-        graph = self.graph  # we use this graph to set up a LP problem
-        nodes = list(graph.nodes())
-        edges = list(graph.edges())
-        if nodes:
-            prob = lp.LpProblem('VC', lp.LpMinimize)
-            x = lp.LpVariable.dict('x', nodes, lowBound=0)
-            prob += sum(x[i] for i in nodes)
-            for e in edges:
-                prob += (x[e[0]] + x[e[1]] >= 1)
-            for n in nodes:
-                if n not in self.remaining_vertices:
-                    prob += (x[n] <= 0)
-            # solve the problem
-            prob.solve()
-            result = sum([lp.value(x[i]) for i in x])
-        else:
-            result = self.vc_size - 1
-        return result
+from approx import random_vc
+from graph_utils import read_graph, remove_vertices, remove_isolates
+from vc import is_solution
 
 
-    def get_lower_bound_approx(self, G, random_seed):
-        c = []
-        while nx.number_of_edges(G) != 0:
-            edgesNum = nx.number_of_edges(G)
-            rN = randint(0, edgesNum - 1)
-            edges = list(G.edges())
-            e = edges[rN]
-            v1 = e[0]
-            v2 = e[1]
-            c.append(v1)
-            c.append(v2)
-            G.remove_node(v1)
-            G.remove_node(v2)
-        len(c) / 2 + self.vc_size
+def get_lower_bound(graph, vc, unassigned):
+    ones = [i for i in range(len(vc)) if vc[i] == 1 and not i in unassigned]
+    pruned = remove_isolates(remove_vertices(graph, ones))
+    result = len(ones) + sum(random_vc(pruned)) / 2
+    return result
+
+
+def check(graph, vc, unassigned):
+    for u in range(len(vc)):
+        if u in graph and u not in unassigned and vc[u] == 0 and all(
+                                vc[v] == 0 and v not in unassigned for v in
+                                graph[u]):
+            print('--------------------failed check')
+            return False
+    return True
+
+
+def branch_bound(graph, filename, cutoff_time):
+    start_time = datetime.now()
+    best_vc = vc = [1] * (max(graph) + 1)
+    # best_vc = vc = construct_vc(graph)
+    unassigned = set([i for i in range(len(best_vc)) if i in graph])
+    lb = get_lower_bound(graph, vc, unassigned)
+    best_vc_value = vc_value = sum(best_vc)
+    frontier = []
+    heappush(frontier, ((lb, vc, unassigned)))
+    while len(frontier) > 0 and not lb == vc_value:
+        lb, vc, unassigned = heappop(frontier)
+
+        if len(unassigned) == 0:
+            continue
+
+        i = min(unassigned, key=lambda x: len(graph[x]))
+        with_vi = [v for v in vc]
+        with_vi[i] = 1
+        without_vi = [v for v in vc]
+        without_vi[i] = 0
+        for n in [with_vi, without_vi]:
+            if is_solution(graph, n):
+                vc_value = sum(n)
+                if vc_value < best_vc_value:
+                    best_vc_value = vc_value
+                    best_vc = n
+                else:
+                    print('----------- worse solution ------------')
+
+            if len(unassigned) > 0:
+                copy = set([i for i in unassigned])
+                copy.remove(i)
+                if not check(graph, vc, unassigned):
+                    continue
+                lb = get_lower_bound(graph, n, unassigned)
+                if lb < best_vc_value:
+                    heappush(frontier, (lb, n, copy))
+                else:
+                    print('dq by lower bound--------------------')
+
+        print(best_vc_value, lb, len(frontier))
+
+        remove_start = len(frontier)
+        for i in range(len(frontier)):
+            if frontier[i][0] > best_vc_value:
+                remove_start = i + 1
+        frontier = nsmallest(remove_start, frontier)
+
+    base = filename.split('/')[-1].split('.')[0] \
+           + '_BnB_' + str(cutoff_time)
+    cur_time = datetime.now()
+    with open(base + '.trace', 'w') as trace:
+        trace.write('{:0.2f}'.format(
+            (cur_time - start_time).total_seconds()
+        ))
+        trace.write(',' + str(sum(best_vc)) + '\n')
+    with open(base + '.sol', 'w') as sol:
+        sol.write(str(sum(best_vc)) + '\n')
+        sol.write(
+            ','.join([str(i + 1) for i in range(len(best_vc)) if
+                      best_vc[i] == 1]))
+
+    return best_vc
 
 
 def run(filename, cutoff_time, random_seed):
     seed(random_seed)
-    # generate a graph
-    graph = nx.Graph()
-    # convert the input graph into an nx graph
-    input_graph = read_graph(filename)
-    graph.add_nodes_from([i for i in input_graph])
-    for j in input_graph:
-        graph.add_edges_from([(j, i) for i in input_graph[j]])
+    graph = read_graph(filename)
+    return branch_bound(graph, filename, cutoff_time)
 
-    root = BranchBound(graph, graph.nodes(), [], 0)
-    frontier = []
-    frontier.extend([root])
-    cur_solution_size = graph.number_of_nodes()
-    start_time = datetime.now()
-    best = BranchBound(graph, graph.nodes(), [], graph.number_of_nodes())
-    best_is_set = False
-    base = filename.split('/')[-1].split('.')[0] \
-           + '_BnB_' + str(cutoff_time) + '_' \
-           + str(random_seed)
-    with open(base + '.trace', 'w') as trace:
-        while len(frontier) > 0 and datetime.now() - start_time < timedelta(
-                seconds=cutoff_time):
-            print(best.vc_size)
-            frontier.sort(key=lambda x: x.lb)
-            print([x.lb for x in frontier])
-            current = frontier.pop()
-            cur_children = current.expand()
-            if not cur_children:
-                if not current.graph.nodes():
-                    if cur_solution_size > current.vc_size:
-                        cur_solution_size = current.vc_size
-                        best = current
-                        best_is_set = True
-            else:
-                frontier.extend(cur_children)
-
-            frontier = [el for el in frontier if el.lb < cur_solution_size]
-
-            trace.write('{:0.2f}'.format(
-                (datetime.now() - start_time).total_seconds()
-            ))
-            trace.write(',' + str(cur_solution_size) + '\n')
-
-    with open(base + '.sol', 'w') as sol:
-        sol.write(str(best.vc_size) + '\n')
-        sol.write(','.join([str(i + 1) for i in sorted(best.used_vertices)]))
 
 if __name__ == '__main__':
-    run('./data/Data/karate.graph', 100, 0)
+    print(sum(run('./data/Data/jazz.graph', 100)))
