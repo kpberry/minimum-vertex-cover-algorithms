@@ -21,11 +21,12 @@ def vertex_quality_getter(graph):
 def random_vc(graph):
     seed(0)
     vc = [0] * (max(graph) + 1)
-    while len(graph) > 0:
-        u = choice(list(graph.keys()))
-        v = choice(list(graph[u]))
-        graph = remove_isolates(remove_vertices(graph, (u, v)))
-        vc[u] = vc[v] = 1
+    for u in graph:
+        if not vc[u]:
+            for v in graph[u]:
+                if not vc[v]:
+                    vc[u] = vc[v] = 1
+                    break
     return vc
 
 

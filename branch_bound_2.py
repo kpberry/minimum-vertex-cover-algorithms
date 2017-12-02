@@ -1,9 +1,9 @@
 from datetime import datetime
-from queue import PriorityQueue
+from heapq import heappush, heappop, nsmallest
 
 from approx import random_vc
 from graph_utils import read_graph, remove_vertices, remove_isolates
-from vc import is_solution
+from vc import is_solution, construct_vc
 
 
 def get_lower_bound(graph, vc, unassigned):
@@ -31,10 +31,10 @@ def branch_bound(graph, filename, cutoff_time):
     unassigned = set([i for i in range(len(best_vc)) if i in graph])
     lb = get_lower_bound(graph, vc, unassigned)
     best_vc_value = vc_value = sum(best_vc)
-    frontier = PriorityQueue()
-    frontier.put((lb, vc, unassigned))
-    while not frontier.empty() and not lb == vc_value:
-        lb, vc, unassigned = frontier.get()
+    frontier = []
+    heappush(frontier, ((lb, vc, unassigned)))
+    while len(frontier) > 0 and not lb == vc_value:
+        lb, vc, unassigned = heappop(frontier)
 
         if len(unassigned) == 0:
             continue
@@ -60,11 +60,17 @@ def branch_bound(graph, filename, cutoff_time):
                     continue
                 lb = get_lower_bound(graph, n, unassigned)
                 if lb < best_vc_value:
-                    frontier.put((lb, n, copy))
+                    heappush(frontier, (lb, n, copy))
                 else:
                     print('dq by lower bound--------------------')
 
-        print(best_vc_value, lb, frontier.qsize())
+        print(best_vc_value, lb, len(frontier))
+
+        remove_start = len(frontier)
+        for i in range(len(frontier)):
+            if frontier[i][0] > lb:
+                remove_start = i + 1
+        frontier = nsmallest(remove_start, frontier)
 
     base = filename.split('/')[-1].split('.')[0] \
                + '_BnB_' + str(cutoff_time)
@@ -89,4 +95,4 @@ def run(filename, cutoff_time):
 
 
 if __name__ == '__main__':
-    print(sum(run('./data/Data/karate.graph', 100000)))
+    print(sum(run('./data/Data/email.graph', 100)))
