@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from heapq import heappush, heappop, nsmallest
 from random import seed
 
@@ -33,7 +33,8 @@ def branch_bound(graph, filename, cutoff_time):
     best_vc_value = vc_value = sum(best_vc)
     frontier = []
     heappush(frontier, ((lb, vc, unassigned)))
-    while len(frontier) > 0 and not lb == vc_value:
+    while len(frontier) > 0 and not lb == vc_value\
+            and datetime.now() - start_time < timedelta(seconds=cutoff_time):
         lb, vc, unassigned = heappop(frontier)
 
         if len(unassigned) == 0:
@@ -96,4 +97,4 @@ def run(filename, cutoff_time, random_seed):
 
 
 if __name__ == '__main__':
-    print(sum(run('./data/Data/star.graph', 100, 0)))
+    print(sum(run('./data/Data/star.graph', 1, 0)))
