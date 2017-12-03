@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
-from random import seed, choice
+from random import seed
 
-from graph_utils import read_graph, copy_graph, remove_vertices, remove_isolates
+from graph_utils import read_graph, copy_graph
 from vc import construct_vc
 
 

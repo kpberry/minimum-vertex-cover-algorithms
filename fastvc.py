@@ -40,6 +40,11 @@ def fast_vc(graph, filename, cutoff_time, random_seed):
             if is_solution(graph, vc):
                 print(sum(vc))
                 best = [i for i in vc]
+                # log results
+                trace.write('{:0.2f}'.format(
+                    (cur_time - start_time).total_seconds()
+                ))
+                trace.write(',' + str(sum(best)) + '\n')
                 min_loss = min([i for i in range(len(vc))],
                                key=lambda i: inf if vc[i] == 0 else losses[i])
                 vc[min_loss] = 0
@@ -67,11 +72,6 @@ def fast_vc(graph, filename, cutoff_time, random_seed):
                 else:
                     losses[v] -= 1
             cur_time = datetime.now()
-            # log results
-            trace.write('{:0.2f}'.format(
-                (cur_time - start_time).total_seconds()
-            ))
-            trace.write(',' + str(sum(best)) + '\n')
 
     with open(base + '.sol', 'w') as sol:
         sol.write(str(sum(best)) + '\n')
