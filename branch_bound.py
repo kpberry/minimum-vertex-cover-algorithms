@@ -15,12 +15,12 @@ def get_lower_bound(graph, vc, unassigned):
 
 
 def check(graph, vc, unassigned):
-    for u in range(len(vc)):
-        if u in graph and u not in unassigned and vc[u] == 0 and all(
-                                vc[v] == 0 and v not in unassigned for v in
-                                graph[u]):
-            print('--------------------failed check')
-            return False
+    for u in graph:
+        for v in graph[u]:
+            if u not in unassigned and v not in unassigned and vc[u] + vc[
+                v] == 0:
+                print('-----------------------failed check')
+                return False
     return True
 
 
@@ -29,8 +29,8 @@ def branch_bound(graph, filename, cutoff_time):
            + '_BnB_' + str(cutoff_time)
     with open(base + '.trace', 'w') as trace:
         start_time = cur_time = datetime.now()
-        best_vc = vc = [1] * (max(graph) + 1)
-        # best_vc = vc = construct_vc(graph)
+        # best_vc = vc = [0] * (max(graph) + 1)
+        best_vc = vc = random_vc(graph)
         unassigned = set([i for i in range(len(best_vc)) if i in graph])
         lb = get_lower_bound(graph, vc, unassigned)
         best_vc_value = vc_value = sum(best_vc)
@@ -100,4 +100,4 @@ def run(filename, cutoff_time, random_seed):
 
 
 if __name__ == '__main__':
-    print(sum(run('./data/Data/karate.graph', 10, 0)))
+    print(sum(run('./data/Data/jazz.graph', 1000, 0)))

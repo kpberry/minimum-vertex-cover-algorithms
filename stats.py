@@ -76,5 +76,5 @@ def gen_qrtd(run_values, run_times, opt, percents, times):
 
 
 if __name__ == '__main__':
-    gen_averages(['LS2'])
-    # gen_qrtds(['LS1'])
+    gen_averages(['BnB', 'LS1', 'LS2', 'Approx'])
+    gen_qrtds(['LS1'])
