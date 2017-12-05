@@ -1,12 +1,13 @@
 # File containing our implementation of a variation on randomized hill climbing.
 # Uses two neighbor functions: get_close_neighbor, which tries to remove a
 # random vertex from a VC if doing so will keep the VC a solution, and
-# get_neighbors, which removes 1 a random vertex from a graph if it is a
-# solution or add 1 vertex to a graph if it is not a solution.
+# get_neighbors, which removes 0 to 3 random vertices from a graph if it is a
+# solution or add 1 to 3 vertices to a graph if it is not a solution.
 
 from datetime import datetime, timedelta
 from random import random, seed, choice
 
+from approx import edge_deletion
 from graph_utils import read_graph
 from vc import is_solution, eval_fitness
 
@@ -38,8 +39,9 @@ def get_neighbors(vc, graph_is_solution, iterations=10):
     if graph_is_solution:
         for i in range(iterations):
             copy = [v for v in vc]
-            # Choose a random vertex to remove (may already be removed)
-            copy[int(random() * len(vc))] = 0
+            # Choose up to 3 random vertices to remove (may already be removed)
+            for i in range(int(random() * 3) + 1):
+                copy[int(random() * len(vc))] = 0
             yield copy
     # If the graph is not a solution, definitely add a vertex. Again, yields in
     # case early stopping is possible.
@@ -48,8 +50,9 @@ def get_neighbors(vc, graph_is_solution, iterations=10):
         zeroes = [i for i in range(len(vc)) if vc[i] == 0]
         for i in range(iterations):
             copy = [v for v in vc]
-            # Add 1 vertex
-            copy[choice(zeroes)] = 1
+            # Add 1 to 3 vertices
+            for i in range(int(random() * 3) + 1):
+                copy[choice(zeroes)] = 1
             yield copy
 
 
@@ -110,7 +113,8 @@ def randomized_hill_climb(problem, gen_model, filename, cutoff_time,
                         model_is_solution = is_solution(problem, model)
                         if fitness > best_so_far and model_is_solution:
                             best_so_far = fitness
-                            most_fit = model
+                            if most_fit is None or sum(model) < sum(most_fit):
+                                most_fit = model
                             # log results
                             trace.write('{:0.2f}'.format(
                                 (cur_time - start_time).total_seconds()
@@ -130,15 +134,16 @@ def randomized_hill_climb(problem, gen_model, filename, cutoff_time,
                             most_fit[i] == 1]))
     return most_fit
 
+
 # Run the algorithm on an input graph with a specified time and random seed
 def run(filename, cutoff_time, random_seed):
     seed(random_seed)
     graph = read_graph(filename)
     randomized_hill_climb(graph,
                           # Generate the initial candidate as all vertices
-                          lambda g: [1] * (max(graph) + 1),
+                          edge_deletion,
                           filename, cutoff_time, random_seed)
 
 
 if __name__ == '__main__':
-    run('./data/Data/star.graph', 600, 0)
+    run('./data/Data/star2.graph', 600, 0)
