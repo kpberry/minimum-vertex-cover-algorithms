@@ -40,33 +40,6 @@ def is_solution(graph, vc):
     return True
 
 
-def construct_vc(graph, return_losses=False):
-    vc = [0] * (max(graph) + 1)
-    edges = get_edges(graph)
-    for u, v in edges:
-        if vc[u] + vc[v] == 0:
-            vc[max(u, v, key=lambda x: len(graph[x]))] = 1
-
-    losses = [0] * len(vc)
-    for u, v in edges:
-        if vc[u] + vc[v] == 1:
-            if vc[u] > vc[v]:
-                losses[u] += 1
-            else:
-                losses[v] += 1
-
-    for u in range(len(vc)):
-        if losses[u] == 0:
-            vc[u] = 0
-            if u in graph:
-                for v in graph[u]:
-                    losses[v] += 1
-
-    if return_losses:
-        return vc, losses
-    return vc
-
-
 def eval_fitness(graph, vc):
     # get the total number of edges to cover vs. the number covered by vc
     covered_edges = 0

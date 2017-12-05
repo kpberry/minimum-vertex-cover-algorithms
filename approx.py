@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from random import seed
 
 from graph_utils import read_graph, copy_graph
-from vc import construct_vc
 
 
 # Run the algorithm on an input graph with a specified time and random seed
@@ -58,7 +57,8 @@ def greedy_vc(graph, filename=None, cutoff_time=None):
                + '_Approx_' + str(cutoff_time)
 
     # Loop while the graph has uncovered edges
-    while len(graph) > 0:
+    while len(graph) > 0 and cur_time - start_time < timedelta(
+            seconds=cutoff_time):
         # get the best vertex and add it to the VC
         best = max(list(graph.keys()), key=vertex_quality_getter(graph))
         vc[best] = 1
