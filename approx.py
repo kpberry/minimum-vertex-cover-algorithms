@@ -11,13 +11,6 @@ from random import seed
 from graph_utils import read_graph, copy_graph
 
 
-# Run the algorithm on an input graph with a specified time and faux random seed
-def run(filename, cutoff_time, random_seed):
-    seed(random_seed)
-    graph = read_graph(filename)
-    return greedy_vc(graph, filename, cutoff_time)
-
-
 # Retrieves a function which will be used to measure vertex quality.
 # This has been implemented this way to make its use as a key function for
 # finding a max value in a graph possible.
@@ -50,12 +43,6 @@ def greedy_vc(graph, filename=None, cutoff_time=None):
     start_time = cur_time = datetime.now()
     vc = [0] * (max(graph) + 1)
 
-    # IO stuff
-    base = None
-    if filename is not None:
-        base = filename.split('/')[-1].split('.')[0] \
-               + '_Approx_' + str(cutoff_time)
-
     # Loop while the graph has uncovered edges
     while len(graph) > 0 and cur_time - start_time < timedelta(
             seconds=cutoff_time):
@@ -71,16 +58,19 @@ def greedy_vc(graph, filename=None, cutoff_time=None):
         cur_time = datetime.now()
 
     # write the found solution
-    if base is not None:
-        with open(base + '.trace', 'w') as trace:
-            trace.write('{:0.2f}'.format(
-                (cur_time - start_time).total_seconds()
-            ))
-            trace.write(',' + str(sum(vc)) + '\n')
-        with open(base + '.sol', 'w') as sol:
-            sol.write(str(sum(vc)) + '\n')
-            sol.write(
-                ','.join([str(i + 1) for i in range(len(vc)) if
-                          vc[i] == 1]))
+    base = filename.split('/')[-1].split('.')[0] + '_Approx_' + str(cutoff_time)
+    with open(base + '.trace', 'w') as trace:
+        trace.write('{:0.2f}'.format((cur_time - start_time).total_seconds()))
+        trace.write(',' + str(sum(vc)) + '\n')
+    with open(base + '.sol', 'w') as sol:
+        sol.write(str(sum(vc)) + '\n')
+        sol.write(','.join([str(i + 1) for i in range(len(vc)) if vc[i] == 1]))
 
     return vc
+
+
+# Run the algorithm on an input graph with a specified time and faux random seed
+def run(filename, cutoff_time, random_seed):
+    seed(random_seed)
+    graph = read_graph(filename)
+    return greedy_vc(graph, filename, cutoff_time)

@@ -37,4 +37,6 @@ def gen_rel_errors(algos):
 
 
 if __name__ == '__main__':
-    gen_rel_errors(['BnB', 'LS1', 'LS2', 'Approx'])
+    gen_rel_errors(
+        ['BnB', 'LS1', 'LS2', 'Approx', 'Approx2', 'Approx3', 'Approx4']
+    )

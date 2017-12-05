@@ -4,6 +4,7 @@
 import argparse
 
 import approx
+import approx2
 import branch_bound
 import fastvc
 import hill_climbing
@@ -32,6 +33,12 @@ if __name__ == '__main__':
         branch_bound.run(inst, time, seed)
     elif alg == 'Approx':
         approx.run(inst, time, seed)
+    elif alg == 'Approx2':
+        approx2.run(inst, time, seed, algo='Approx2')
+    elif alg == 'Approx3':
+        approx2.run(inst, time, seed, algo='Approx3')
+    elif alg == 'Approx4':
+        approx2.run(inst, time, seed, algo='Approx4')
     elif alg == 'LS1':
         hill_climbing.run(inst, time, seed)
     elif alg == 'LS2':
