@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from heapq import heappush, heappop, nsmallest
 from random import seed
 
-from approx import random_vc
+from approx import edge_deletion
 from graph_utils import read_graph, remove_vertices, remove_isolates
 from vc import is_solution
 
@@ -10,7 +10,7 @@ from vc import is_solution
 def get_lower_bound(graph, vc, unassigned):
     ones = [i for i in range(len(vc)) if vc[i] == 1 and not i in unassigned]
     pruned = remove_isolates(remove_vertices(graph, ones))
-    result = len(ones) + sum(random_vc(pruned)) / 2.0
+    result = len(ones) + sum(edge_deletion(pruned)) / 2.0
     return result
 
 
@@ -30,7 +30,7 @@ def branch_bound(graph, filename, cutoff_time):
     with open(base + '.trace', 'w') as trace:
         start_time = cur_time = datetime.now()
         # best_vc = vc = [0] * (max(graph) + 1)
-        best_vc = vc = random_vc(graph)
+        best_vc = vc = edge_deletion(graph)
         unassigned = set([i for i in range(len(best_vc)) if i in graph])
         lb = get_lower_bound(graph, vc, unassigned)
         best_vc_value = vc_value = sum(best_vc)
