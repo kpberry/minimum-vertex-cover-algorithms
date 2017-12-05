@@ -58,6 +58,13 @@ def branch_bound(graph, filename, cutoff_time):
         # candidate configuration. The heap will be sorted by lower bounds.
         frontier = []
         heappush(frontier, ((lb, vc, unassigned)))
+
+        # IO stuff; write the initial solution in case no improvements are made
+        trace.write('{:0.2f}'.format(
+            (cur_time - start_time).total_seconds()
+        ))
+        trace.write(',' + str(sum(best_vc)) + '\n')
+
         # Stop looping when a solution can't be improved or when time is up
         while len(frontier) > 0 and not lb == vc_value \
                 and cur_time - start_time < timedelta(seconds=cutoff_time):
@@ -137,7 +144,3 @@ def run(filename, cutoff_time, random_seed=0):
     seed(random_seed)
     graph = read_graph(filename)
     return branch_bound(graph, filename, cutoff_time)
-
-
-if __name__ == '__main__':
-    print(sum(run('./data/Data/jazz.graph', 1000, 0)))

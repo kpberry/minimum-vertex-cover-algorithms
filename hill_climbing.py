@@ -143,7 +143,3 @@ def run(filename, cutoff_time, random_seed):
                           # Generate the initial candidate as all vertices
                           edge_deletion,
                           filename, cutoff_time, random_seed)
-
-
-if __name__ == '__main__':
-    run('./data/Data/star2.graph', 600, 0)

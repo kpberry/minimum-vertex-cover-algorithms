@@ -140,12 +140,9 @@ def fast_vc(graph, filename, cutoff_time, random_seed):
             ','.join([str(i + 1) for i in range(len(best)) if best[i] == 1]))
     return best
 
+
 # Run the algorithm on an input graph with a specified time and random seed
 def run(filename, cutoff_time, random_seed):
     seed(random_seed)
     graph = read_graph(filename)
     fast_vc(graph, filename, cutoff_time, random_seed)
-
-
-if __name__ == '__main__':
-    run('./data/Data/star.graph', 6, 0)
