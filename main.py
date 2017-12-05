@@ -1,3 +1,6 @@
+# Main executable file. Can be run with arguments of the form described in the
+# assignment PDF.
+
 import argparse
 
 import approx
@@ -6,18 +9,25 @@ import fastvc
 import hill_climbing
 
 if __name__ == '__main__':
+    # Define the possible arguments.
     parser = argparse.ArgumentParser()
     parser.add_argument('-inst', type=str, nargs=1)
     parser.add_argument('-alg', type=str, nargs=1)
     parser.add_argument('-time', type=int, nargs=1)
-    parser.add_argument('-seed', type=int, nargs=1)
+    parser.add_argument('-seed', type=int)
 
+    # Read the arguments
     args = parser.parse_args()
     inst = args.inst[0]
     alg = args.alg[0]
     time = args.time[0]
-    seed = args.seed[0]
+    # Seed defaults to 0 and is ignored in approx and BnB
+    if args.seed:
+        seed = args.seed[0]
+    else:
+        seed = 0
 
+    # Run the specified algorithm.
     if alg == 'BnB':
         branch_bound.run(inst, time, seed)
     elif alg == 'Approx':
@@ -28,5 +38,7 @@ if __name__ == '__main__':
         fastvc.run(inst, time, seed)
     else:
         print('Invalid algorithm entered.')
+
+    # Notify that the algorithm is done running
     print('Evaluation complete for ' + alg + ' on ' + inst
           + ' with ' + str(time) + ' seconds and a seed of ' + str(seed))
