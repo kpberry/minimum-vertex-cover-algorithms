@@ -11,19 +11,19 @@ import hill_climbing
 if __name__ == '__main__':
     # Define the possible arguments.
     parser = argparse.ArgumentParser()
-    parser.add_argument('-inst', type=str, nargs=1)
-    parser.add_argument('-alg', type=str, nargs=1)
-    parser.add_argument('-time', type=int, nargs=1)
+    parser.add_argument('-inst', type=str)
+    parser.add_argument('-alg', type=str)
+    parser.add_argument('-time', type=int)
     parser.add_argument('-seed', type=int)
 
     # Read the arguments
     args = parser.parse_args()
-    inst = args.inst[0]
-    alg = args.alg[0]
-    time = args.time[0]
+    inst = args.inst
+    alg = args.alg
+    time = args.time
     # Seed defaults to 0 and is ignored in approx and BnB
     if args.seed:
-        seed = args.seed[0]
+        seed = args.seed
     else:
         seed = 0
 

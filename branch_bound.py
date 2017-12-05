@@ -48,7 +48,7 @@ def branch_bound(graph, filename, cutoff_time):
 
         # start with a 2 approximation
         best_vc = vc = edge_deletion(graph)
-        # make a list of all the unassigned vertice in the configuration, which
+        # make a list of all the unassigned vertices in the configuration, which
         # is initially all of them
         unassigned = set([i for i in range(len(best_vc)) if i in graph])
         # Compute the initial lower bound and number of vertices in the VC

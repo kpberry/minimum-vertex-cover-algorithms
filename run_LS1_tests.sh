@@ -10,9 +10,9 @@ do
         do
             echo ${filename}
             echo ${algo}
-            python3 main.py -inst ${filename} -alg ${algo} -seed $i -time 1000 &
+            python3 main.py -inst ${filename} -alg ${algo} -seed $i -time 600 &
         done
-        sleep 1030
+        sleep 630
         mv *.trace *.sol ${algo}/
     done
     mkdir ${algo}
@@ -21,9 +21,9 @@ do
         do
             echo ${filename}
             echo ${algo}
-            python3 main.py -inst ${filename} -alg ${algo} -seed $i -time 1000 &
+            python3 main.py -inst ${filename} -alg ${algo} -seed $i -time 600 &
         done
-        sleep 1030
+        sleep 630
         mv *.trace *.sol ${algo}/
     done
     mkdir ${algo}
@@ -32,9 +32,9 @@ do
         do
             echo ${filename}
             echo ${algo}
-            python3 main.py -inst ${filename} -alg ${algo} -seed $i -time 1000 &
+            python3 main.py -inst ${filename} -alg ${algo} -seed $i -time 600 &
         done
-        sleep 1030
+        sleep 630
         mv *.trace *.sol ${algo}/
     done
 done
