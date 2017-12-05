@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# File for automatically generating all approximation test data.
 algo=Approx
 mkdir ${algo}
 for filename in ./data/Data/*.graph; do

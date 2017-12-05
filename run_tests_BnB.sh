@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# File for running all branch and bound tests.
+# Splits the data into batches of 4 so that each run can be executed in
+# parallel on my dual core machine without significant loss of performance.
 for algo in BnB;
 do
     mkdir ${algo}
