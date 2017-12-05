@@ -1,6 +1,6 @@
-# File for approximation algorithms. Contains an implementation of the
-# MG algorithm, as described in the report, which greedily chooses vertices
-# for a vertex cover using a scoring function.
+# File for the approximation algorithms used by main.py
+# Contains an implementation of the MG algorithm, as described in the report,
+# which greedily chooses vertices for a vertex cover using a scoring function.
 # The scoring function we have chosen to use is the one returned by
 # vertex_quality_getter, and scores a vertex by its number of neighbors
 # vs. the fewest neighbors any of its neighbors has.

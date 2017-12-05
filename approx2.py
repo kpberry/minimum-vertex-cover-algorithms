@@ -1,3 +1,9 @@
+# File containing auxiliary approximation algorithms, including a networkx
+# implementation of edge deletion, maximum degree greedy selection, and
+# greedy independent cover selection.
+# Assumes that data is located in the folder ./Data/
+# Will not be used by main.py
+
 import networkx as nx
 import time
 from random import randint, seed
@@ -5,7 +11,7 @@ import operator
 
 
 class Approx:
-    # Function to
+    # Copy of the graph reading function from graph_utils.py
     def read_graph(self, filename):
         G = nx.Graph()
         with open(filename, "r") as inputfile:
@@ -18,6 +24,8 @@ class Approx:
                     G.add_edge(i, node)
         return G
 
+    # Approximation algorithm which iteratively selects edges, adds the
+    # endpoints to the vertex cover, then deletes the edge.
     def edge_deletion(self, G):
         seed(0)
         c = []
@@ -34,6 +42,8 @@ class Approx:
             G.remove_node(v2)
         return c
 
+    # Approximation algorithm that greedily selects the vertex of max degree in
+    # the graph, then adds it and delets any of its outgoing edges.
     def maximum_degree_greedy(self, G):
         c = []
         while nx.number_of_edges(G) != 0:
@@ -44,6 +54,9 @@ class Approx:
             G.remove_node(v)
         return c
 
+    # Approximation algorithm that greedily selects the vertex of min degree,
+    # adds each of its neighbors to the vertex cover, then deletes the newly
+    # covered edges.
     def greedy_independent_cover(self, G):
         c = []
         while nx.number_of_edges(G) != 0:
@@ -54,7 +67,7 @@ class Approx:
             G.remove_node(v)
             G.remove_nodes_from(v_list)
         return c
-
+    # Function which checks whether or not a set of vertices is a vertex cover
     def check_vc(self, G, c):
         for e in list(G.edges()):
             if e[0] not in c and e[1] not in c:
@@ -62,6 +75,7 @@ class Approx:
                 return False
         return True
 
+    # IO stuff
     def main(self):
         input_file_name = ["as-22july06.graph", "delaunay_n10.graph",
                            "email.graph", "football.graph", "hep-th.graph",
