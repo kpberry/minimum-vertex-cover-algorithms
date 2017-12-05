@@ -11,7 +11,7 @@ from random import seed
 from graph_utils import read_graph, copy_graph
 
 
-# Run the algorithm on an input graph with a specified time and random seed
+# Run the algorithm on an input graph with a specified time and faux random seed
 def run(filename, cutoff_time, random_seed):
     seed(random_seed)
     graph = read_graph(filename)
