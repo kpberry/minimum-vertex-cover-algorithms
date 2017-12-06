@@ -14,6 +14,7 @@ def gen_rel_errors(algos):
         counts = [0] * len(names)
         vc_vals = [0] * len(names)
         rel_errs = [0] * len(names)
+        times = [0] * len(names)
 
         # get the quality of the solution and increment the solution count for
         # the algorithm with the given name
@@ -23,16 +24,22 @@ def gen_rel_errors(algos):
                 with open(algo + '/' + filename, 'r') as file:
                     vc_vals[i] += int(file.readline().split(',')[0])
                     counts[i] += 1
+            else:
+                i = list(names).index(filename.split('_')[0])
+                with open(algo + '/' + filename, 'r') as file:
+                    times[i] += float([line for line in file][-1].split(',')[0])
 
         # Compute the relative errors
         for i in range(len(vc_vals)):
             vc_vals[i] /= counts[i]
             rel_errs[i] = (vc_vals[i] - opts[i]) / opts[i]
+            times[i] /= counts[i]
 
         # Output the results
         for i in range(len(names)):
             print(names[i])
-            print('VC Value', vc_vals[i], 'RelErr', rel_errs[i])
+            print('Average Time', str(times[i]) + 's', 'VC Value', vc_vals[i],
+                  'RelErr', rel_errs[i])
         print()
 
 
